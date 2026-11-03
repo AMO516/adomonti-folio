@@ -1,0 +1,742 @@
+/* ==========================================================================
+   adomonti.css — Adolfo Monti portfolio
+   Loaded AFTER Bootstrap 5.3, so it overrides Bootstrap's CSS variables.
+
+   How this file is organised
+   - Every value that repeats lives in a token (section 1): colors, type scale, weights,
+     letter-spacing, line-heights, spacing steps, page rhythm.
+   - Tokens that differ between phones and tablet/desktop are redefined once, in the
+     768px media query of section 1 — components just use the token.
+   - Each component keeps its base rule and its breakpoint rules together, base first.
+     (A rule placed ABOVE the rule it overrides is silently ignored — keep this order.)
+   - Breakpoints: phones < 768px · tablet 768–991px · desktop >= 992px (full navigation).
+
+   Contents
+   0.  Font
+   1.  Design tokens
+   2.  Base
+   3.  Typography
+   4.  Layout helpers
+   5.  Header + mobile menu
+   6.  Buttons
+   7.  Hero
+   8.  Project cards (home)
+   9.  Services
+   10. About
+   11. Case-study pages
+   12. Sticky-reveal footer
+   13. Custom cursor
+   14. Scroll reveals
+   15. Reduced motion
+   ========================================================================== */
+
+
+/* ==========================================================================
+   0. FONT
+   Inter variable, self-hosted (SIL Open Font License). One file covers weights 100-900
+   and the optical-size axis. Source: https://rsms.me/inter/font-files/InterVariable.woff2
+   ========================================================================== */
+@font-face {
+  font-family: "InterVariable";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../assets/fonts/InterVariable.woff2") format("woff2");
+}
+
+
+/* ==========================================================================
+   1. DESIGN TOKENS
+   ========================================================================== */
+:root {
+  /* ---- Colors: neutral ramp ---- */
+  --g10:  #FAF7F0; /* Paper    — page background */
+  --g20:  #EFECE6; /* Vellum   — cards and surfaces */
+  --g30:  #DAD7D2; /* Plaster  — hairlines and dividers */
+  --g40:  #B8B6B2; /* Pewter   — hairlines on paper; secondary text on ink */
+  --g50:  #8B8986; /* Zinc     — input borders and icons */
+  --g60:  #646360; /* Graphite — secondary text */
+  --g80:  #2F2E2C; /* Charcoal — raised surface on dark */
+  --g100: #080808; /* Ink      — body text and dark sections */
+
+  /* ---- Colors: accent ---- */
+  --signal:       #FE654F; /* Buttons and highlights (always with g100 text) */
+  --signal-hover: #F05F4A; /* Hover / pressed fills (g100 text) */
+  --signal-deep:  #B23929; /* Links and text on light backgrounds */
+  --signal-tint:  #FFE2DB; /* Soft backgrounds and tags */
+  --marker:       #60AFFF; /* ::selection background (g100 text) */
+  --status-ok:    #6FE37B; /* "Available for work" dot (not part of the brand palette) */
+
+  /* ---- Font weights ---- */
+  --fw-text:     450; /* paragraphs, lists, tags */
+  --fw-medium:   500; /* labels, statements, nav, buttons */
+  --fw-card:     550; /* project card titles */
+  --fw-semibold: 600; /* group titles */
+  --fw-bold:     700; /* display titles */
+
+  /* ---- Letter-spacing ---- */
+  --ls-ui:      -0.01em; /* nav, buttons, small UI text */
+  --ls-text:    -0.02em; /* paragraphs, labels, titles */
+  --ls-list:    -0.015em; /* list rows (kept as designed) */
+  --ls-heading: -0.03em; /* default headings, hero tagline */
+
+  /* ---- Line-heights ---- */
+  --lh-display: 0.9;
+  --lh-heading: 1.2;  /* statements, card titles, tagline */
+  --lh-text:    1.3;  /* paragraphs, labels */
+  --lh-ui:      1.35; /* nav, buttons, tags */
+  --lh-title:   1.4;  /* group titles */
+
+  /* ---- Spacing steps (multiples of 4/8) ---- */
+  --space-4:  0.25rem;
+  --space-8:  0.5rem;
+  --space-12: 0.75rem;
+  --space-16: 1rem;
+  --space-24: 1.5rem;
+  --space-32: 2rem;
+  --space-40: 2.5rem;
+  --space-48: 3rem;
+
+  /* ---- Type scale (fluid) — clamp(min, preferred, max): rem + vw grows smoothly with the viewport ---- */
+  --fs-nav:     1.125rem;                                      /* 18px     nav links + buttons (all sizes) */
+  --fs-body:    clamp(1.0625rem, 0.95rem + 0.4vw, 1.25rem);    /* 17→20px  base text, list rows */
+  --fs-copy:    clamp(1.125rem, 0.95rem + 0.4vw, 1.25rem);     /* 18→20px  paragraphs */
+  --fs-small:   clamp(0.875rem, 0.82rem + 0.2vw, 1rem);        /* 14→16px  badge, notes */
+  --fs-tag:     clamp(0.875rem, 0.75rem + 0.5vw, 1.125rem);    /* 14→18px  card tags */
+  --fs-card:    clamp(1.0625rem, 0.9rem + 0.7vw, 1.5rem);      /* 17→24px  project card titles */
+  --fs-title:   clamp(1.25rem, 0.9rem + 0.7vw, 1.5rem);        /* 20→24px  group titles */
+  --fs-label:   clamp(1.25rem, 1rem + 0.9vw, 1.75rem);         /* 20→28px  section labels */
+
+  /* Phones (< 768px) — statements, hero tagline, hero title */
+  --fs-statement: clamp(1.5rem, 7.5vw, 1.75rem);               /* 24→28px */
+  --fs-tagline:   clamp(1.375rem, 7.5vw, 1.75rem);             /* 22→28px */
+  --fs-display:   clamp(2.5rem, 18.46vw, 4.5rem);              /* 40→72px  "DESIGNER" must fit the width */
+  --ls-statement: -0.03em;
+  --ls-display:   -0.04em;
+  --par-gap:      0.75rem;                                     /* between paragraphs */
+
+  /* ---- Layout ---- */
+  --page-gutter: clamp(1.25rem, 0.2rem + 5.5vw, 5rem);        /* side space: 20px → 80px (padding only, no extra margin) */
+  --grid-gap:    clamp(1rem, 0.6rem + 1.1vw, 1.5rem);          /* 16→24px column gutter */
+  --header-h:    3.5rem;                                       /* 56px phones/tablet: 20px above and below the 16px logo */
+
+  /* Vertical rhythm: every section has --section-pad above AND below it, so two sections are 2x apart */
+  --section-pad:   clamp(3rem, 1.5rem + 4.1vw, 5rem);          /* 48→80px */
+  --section-space: calc(var(--section-pad) * 2);               /* 96→160px */
+  --label-gap:     clamp(2.5rem, 0.5rem + 5.2vw, 5rem);        /* 40→80px  label → content */
+  --block-gap:     clamp(2.5rem, 1rem + 5.8vw, 6rem);          /* 40→96px  statement → content */
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.22, 0.8, 0.24, 1);
+  --t-img: 900ms;
+
+  /* ---- Set by js/main.js: height of the fixed footer ---- */
+  --footer-h: 0px;
+
+  /* ---- Bootstrap variable overrides ---- */
+  --bs-body-bg: var(--g10);
+  --bs-body-color: var(--g100);
+  --bs-body-font-family: InterVariable, Inter, sans-serif;
+  --bs-body-font-size: var(--fs-body);
+  --bs-body-line-height: 1.45;
+  --bs-link-color: var(--signal-deep);
+  --bs-link-hover-color: var(--g100);
+  --bs-border-color: var(--g30);
+  --bs-gutter-x: var(--grid-gap);
+}
+
+/* Tablet and up: larger statement / tagline / title, looser tracking, paragraph gap relative to the text */
+@media (min-width: 768px) {
+  :root {
+    --fs-statement: clamp(1.625rem, 1rem + 2.22vw, 3rem);      /* 26→48px */
+    --fs-tagline:   clamp(1.375rem, 1rem + 1.74vw, 2.5rem);    /* 22→40px */
+    --fs-display:   clamp(2.5rem, 9.4vw + 0.55rem, 9rem);      /* 40→144px (144px at 1440px) */
+    --ls-statement: -0.02em;
+    --ls-display:   -0.03em;
+    --par-gap:      1.1em;
+  }
+}
+@media (min-width: 992px) { :root { --header-h: 4.25rem; } } /* 68px on desktop */
+
+/* Inter — official "web use" CSS (rsms.me/inter); the font file itself is self-hosted via @font-face above. */
+:root {
+  font-family: Inter, sans-serif;
+  font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+}
+@supports (font-variation-settings: normal) {
+  :root { font-family: InterVariable, sans-serif; }
+}
+
+
+/* ==========================================================================
+   2. BASE
+   ========================================================================== */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + 1rem);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--bs-body-font-family);
+  font-optical-sizing: auto; /* Inter 4: large text automatically uses the finer "Display" letterforms */
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  letter-spacing: var(--ls-ui);
+  background: var(--g10);
+  color: var(--g100);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+body.menu-open { overflow: hidden; }
+
+::selection { background: var(--marker); color: var(--g100); }
+
+img, video { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+
+:focus-visible {
+  outline: 2px solid var(--signal-deep);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.skip-link {
+  position: fixed; left: var(--page-gutter); top: 0.75rem; z-index: 1000;
+  padding: var(--space-8) var(--space-16); background: var(--g100); color: var(--g10); border-radius: 999px;
+  transform: translateY(-200%);
+}
+.skip-link:focus { transform: none; }
+
+/* The page wrapper sits ABOVE the fixed footer and scrolls over it. */
+.page {
+  position: relative;
+  z-index: 1;
+  background: var(--g10);
+  margin-bottom: var(--footer-h); /* reserves the scroll distance that reveals the footer */
+}
+
+
+/* ==========================================================================
+   3. TYPOGRAPHY
+   Headings get no size here: every heading on the site sets its own through a class.
+   ========================================================================== */
+h1, h2, h3, h4 { margin: 0; font-weight: var(--fw-semibold); letter-spacing: var(--ls-heading); line-height: 1.05; }
+p { margin: 0 0 1.1em; }
+p:last-child { margin-bottom: 0; }
+
+/* Hero title */
+.display-1 {
+  font-size: var(--fs-display);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
+  text-transform: uppercase;
+}
+
+/* Section label: "projects.", "Overview", "The project" */
+.section-label {
+  font-size: var(--fs-label);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-text);
+  line-height: var(--lh-text);
+}
+
+/* Large statement under a section label */
+.statement {
+  font-size: var(--fs-statement);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-statement);
+  line-height: var(--lh-heading);
+  margin: var(--label-gap) 0 0;
+}
+
+/* Running text: one spec for every paragraph block (services, about, case studies, footer).
+   Paragraphs inside a block are separated by --par-gap. */
+.service-group__text,
+.about__text,
+.split__body,
+.footer-cta__text {
+  font-size: var(--fs-copy);
+  font-weight: var(--fw-text);
+  line-height: var(--lh-text);
+  letter-spacing: var(--ls-text);
+}
+.about__text p, .split__body p { margin: 0; }
+.about__text p + p, .split__body p + p { margin-top: var(--par-gap); }
+
+
+/* ==========================================================================
+   4. LAYOUT HELPERS
+   ========================================================================== */
+/* Full-bleed container with fluid side margins; Bootstrap's .row/.col-* give the 12-col grid. */
+.site-container {
+  width: 100%;
+  max-width: none; /* full width: no side margins on large screens */
+  margin-inline: 0;
+  padding-inline: var(--page-gutter);
+}
+
+.section { padding-block: var(--section-pad); }
+.section__body { margin-top: var(--block-gap); }
+
+/* "Label left, content right" two-column pattern: label on cols 1-6, content on cols 7-12 */
+.split { row-gap: var(--space-24); }
+
+
+/* ==========================================================================
+   5. HEADER + MOBILE MENU
+   ========================================================================== */
+.site-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 300;
+  height: var(--header-h);
+  background: var(--g10);
+  transition: transform 500ms var(--ease-out);
+}
+.site-header.is-hidden { transform: translate3d(0, -100%, 0); }
+
+.site-header__inner {
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--grid-gap);
+  align-items: center;
+}
+
+.brand { grid-column: 1 / span 6; display: inline-flex; align-items: center; justify-self: start; }
+.brand img { height: 16px; width: auto; } /* 16px tall, width scales proportionally (≈154px) */
+
+.site-nav { display: none; } /* full navigation from 992px up (below) */
+
+/* "menu" / "close" pill: outlined, same type as the nav links */
+.menu-toggle {
+  grid-column: 9 / -1; justify-self: end;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0.3rem var(--space-16); border: 1px solid var(--g100); border-radius: 999px; background: transparent;
+  color: var(--g100); cursor: pointer;
+  font-size: var(--fs-nav); font-weight: var(--fw-medium); letter-spacing: var(--ls-ui); line-height: var(--lh-ui);
+}
+
+/* Mobile overlay menu (sits under the header so the logo and the "close" pill stay visible).
+   Stacked links between hairlines at the top; "let's talk" + social links grouped at the bottom. */
+.mobile-menu {
+  position: fixed; inset: 0; z-index: 250;
+  background: var(--g10);
+  display: flex; flex-direction: column;
+  padding: calc(var(--header-h) + var(--space-24)) var(--page-gutter) calc(var(--section-pad) / 2);
+  opacity: 0; visibility: hidden;
+  transition: opacity 400ms var(--ease-out), visibility 0s linear 400ms;
+  overflow-y: auto;
+}
+.menu-open .mobile-menu { opacity: 1; visibility: visible; transition-delay: 0s; }
+.mobile-menu__nav { flex: 1; display: flex; flex-direction: column; }
+
+.mobile-menu__list { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--g40); }
+.mobile-menu__list li { border-top: 1px solid var(--g40); }
+.mobile-menu__list a {
+  display: block; padding: 1.1rem 0; /* ≈ 66px rows */
+  /* same style as the section statements */
+  font-size: var(--fs-statement); font-weight: var(--fw-medium); letter-spacing: var(--ls-statement); line-height: var(--lh-heading);
+}
+
+.mobile-menu__bottom { margin-top: auto; padding-top: var(--space-32); }
+.mobile-menu__social {
+  list-style: none; margin: var(--space-24) 0 0; padding: var(--space-24) 0 0; border-top: 1px solid var(--g40);
+  display: flex; gap: var(--space-40);
+  font-size: var(--fs-nav); font-weight: var(--fw-medium); letter-spacing: var(--ls-ui); line-height: var(--lh-ui);
+}
+
+/* Entrance: items fade in and rise 20px one after another when the menu opens (same motion as the scroll reveals) */
+.mobile-menu__list li, .mobile-menu__bottom {
+  opacity: 0; transform: translate3d(0, 20px, 0);
+  transition: opacity 600ms var(--ease-out), transform 600ms var(--ease-out);
+}
+.menu-open .mobile-menu__list li, .menu-open .mobile-menu__bottom { opacity: 1; transform: none; }
+.menu-open .mobile-menu__list li:nth-child(1) { transition-delay: 120ms; }
+.menu-open .mobile-menu__list li:nth-child(2) { transition-delay: 190ms; }
+.menu-open .mobile-menu__list li:nth-child(3) { transition-delay: 260ms; }
+.menu-open .mobile-menu__bottom { transition-delay: 330ms; }
+
+/* Desktop: logo on columns 1-4, links start on columns 5 / 7 / 9, button on the right */
+@media (min-width: 992px) {
+  .brand { grid-column: 1 / span 4; }
+  .menu-toggle, .mobile-menu { display: none; }
+  .site-nav { display: contents; }
+  .site-nav__link {
+    font-size: var(--fs-nav); font-weight: var(--fw-medium); letter-spacing: var(--ls-ui); line-height: var(--lh-ui);
+    text-align: left; padding: var(--space-8) 0; justify-self: start;
+  }
+  .site-nav__link:nth-of-type(1) { grid-column: 5 / span 2; }
+  .site-nav__link:nth-of-type(2) { grid-column: 7 / span 2; }
+  .site-nav__link:nth-of-type(3) { grid-column: 9 / span 2; }
+  .site-nav .btn-signal { grid-column: 11 / -1; justify-self: end; }
+}
+
+
+/* ==========================================================================
+   6. BUTTONS
+   Pill buttons. Signal fills always carry g100 text (brand rule).
+   ========================================================================== */
+.btn-signal, .btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px; font-weight: var(--fw-medium); letter-spacing: var(--ls-ui);
+  font-size: var(--fs-nav); line-height: var(--lh-ui); white-space: nowrap;
+  transition: background-color 250ms ease, color 250ms ease, border-color 250ms ease;
+  cursor: pointer;
+}
+.btn-signal { background: var(--signal); color: var(--g100); border: 1px solid var(--signal); padding: 0.45rem 1.1rem; }
+.btn-signal:hover, .btn-signal:active { background: var(--signal-hover); border-color: var(--signal-hover); color: var(--g100); }
+
+.btn-ghost { border: 1px solid var(--g60); color: var(--g10); background: transparent; }
+.btn-ghost:hover { background: var(--g10); color: var(--g100); border-color: var(--g10); }
+
+/* Large pill: full width, 56px tall (footer and mobile menu) */
+.btn-lg-pill { padding: 0; height: 3.5rem; width: 100%; font-size: var(--fs-nav); }
+
+
+/* ==========================================================================
+   7. HERO
+   One viewport tall. Desktop: title at the top, tagline at the bottom.
+   Phones: title + tagline form one block, vertically centered.
+   ========================================================================== */
+.hero {
+  min-height: 100vh;  /* fallback */
+  min-height: 100dvh; /* exactly the viewport height; dvh accounts for mobile browser bars */
+  padding-top: clamp(7rem, 4rem + 10vw, 9rem); /* 112→144px (includes the fixed header) */
+  padding-bottom: var(--section-pad);
+  display: flex; flex-direction: column; justify-content: space-between;
+  gap: clamp(3rem, 8vw, 7rem);
+}
+
+/* Tagline: 6 columns (cols 7-12) on desktop, justified, first line indented */
+.hero__tagline {
+  font-size: var(--fs-tagline);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-heading);
+  line-height: var(--lh-heading);
+  text-indent: 2.2em;
+  text-align: justify; hyphens: manual;
+  margin: 0;
+}
+.hero__tagline em { font-style: normal; color: var(--signal); }
+
+@media (max-width: 767.98px) {
+  .hero { justify-content: center; gap: 6rem; padding-block: 7rem; }
+}
+
+
+/* ==========================================================================
+   8. PROJECT CARDS (home grid)
+   CMS pattern: <article class="project-card"> … repeats inside .project-grid
+   ========================================================================== */
+.project-grid { row-gap: clamp(2rem, 4vw, 3.5rem); margin-top: var(--label-gap); }
+
+.project-card a { display: block; }
+
+/* Image container — overflow hidden so the zoomed image stays clipped */
+.media-frame {
+  position: relative; overflow: hidden; background: var(--g20);
+  aspect-ratio: 3 / 2;
+}
+.media-frame img {
+  width: 100%; height: 100%; object-fit: cover;
+  transform: scale(1); transform-origin: 50% 50%;
+  transition: transform var(--t-img) var(--ease-out);
+  will-change: transform;
+}
+/* Hover: gentle zoom — NO text overlay, titles stay below the image */
+@media (hover: hover) {
+  .project-card a:hover .media-frame img { transform: scale(1.05); }
+}
+
+.project-card__meta {
+  display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-16);
+  margin-top: var(--space-12); /* gap below the image */
+}
+.project-card__title { font-size: var(--fs-card); font-weight: var(--fw-card); letter-spacing: var(--ls-text); line-height: var(--lh-heading); }
+.project-card__tag   { font-size: var(--fs-tag); color: var(--g100); font-weight: var(--fw-text); letter-spacing: var(--ls-text); line-height: var(--lh-ui); margin: 0; white-space: nowrap; }
+
+/* Tint fallbacks while images load */
+.project-card--peach .media-frame { background: #F7E9DE; }
+.project-card--grey  .media-frame { background: #EBEBEB; }
+.project-card--olive .media-frame { background: #EFEBD6; }
+
+
+/* ==========================================================================
+   9. SERVICES
+   ========================================================================== */
+.service-group + .service-group { margin-top: clamp(2.5rem, 5vw, 3.5rem); }
+.service-group__title {
+  font-size: var(--fs-title); font-weight: var(--fw-semibold); line-height: var(--lh-title);
+  letter-spacing: var(--ls-text); margin-bottom: var(--space-4);
+}
+.service-group__text { color: var(--g100); margin-bottom: var(--space-24); }
+
+.service-list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: var(--space-8); /* 8px between items; the 24px above the first item comes from .service-group__text */
+}
+.service-list li {
+  display: flex; align-items: baseline; gap: var(--space-12);
+  font-size: var(--fs-body); font-weight: var(--fw-text); letter-spacing: var(--ls-list); line-height: var(--lh-text);
+}
+.service-list li::before { /* accent dot */
+  content: ""; flex: none; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--signal);
+  transform: translateY(-0.1em);
+}
+
+
+/* ==========================================================================
+   10. ABOUT
+   ========================================================================== */
+.about__layout { row-gap: var(--space-40); } /* statement → portrait → text */
+.about__portrait {
+  width: clamp(7rem, 15vw, 13.5rem); /* 112→216px (216px from 1440px up) */
+  aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: var(--g20);
+}
+.about__portrait img { width: 100%; height: 100%; object-fit: cover; }
+.about__text { color: var(--g100); }
+
+
+/* ==========================================================================
+   11. CASE-STUDY PAGES
+   Same tokens as the home page: section rhythm, label gaps, grid, type styles.
+   Column map (desktop): label cols 1-6 · text cols 7-12 · images cols 1-6 / 7-12.
+   ========================================================================== */
+.project-header { padding-top: calc(var(--header-h) + var(--section-pad)); }
+
+.back-link {
+  display: inline-flex; align-items: center; gap: var(--space-8);
+  font-size: var(--fs-nav); font-weight: var(--fw-medium); letter-spacing: var(--ls-ui); line-height: var(--lh-ui);
+  margin-bottom: var(--space-40);
+}
+.back-link svg { transition: transform 300ms var(--ease-out); }
+.back-link:hover svg { transform: translateX(-4px); }
+@media (max-width: 767.98px) { .back-link { margin-bottom: var(--space-32); } } /* phones: 32px between the back link and the title */
+
+/* Case-study title: 80px at desktop width, 48px on phones */
+.project-title {
+  font-size: clamp(3rem, 1rem + 5.1vw, 5rem); /* 48px on phones → 80px from ~1250px up */
+  font-weight: var(--fw-semibold);
+  line-height: 1.05;
+  letter-spacing: var(--ls-heading);
+  margin-bottom: var(--space-32);
+}
+@media (max-width: 767.98px) { .project-title { margin-bottom: var(--space-40); } } /* phones: 40px between the title and the meta row */
+
+/* Meta row: Project type | Services | Year (cols 1-3 · 4-9 · 10-12). Phones: two columns, Year on its own row. */
+.project-meta { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-24) var(--grid-gap); }
+.project-meta dt {
+  font-size: var(--fs-nav); font-weight: var(--fw-text); letter-spacing: var(--ls-text); line-height: var(--lh-ui);
+  color: var(--g100);
+}
+.project-meta dd { /* values: 20px / 130% / 500 / -0.02em */
+  font-size: 1.25rem; font-weight: var(--fw-medium); letter-spacing: var(--ls-text); line-height: var(--lh-text);
+  margin: 0;
+}
+@media (max-width: 767.98px) { .project-meta { row-gap: 1rem; } .project-meta dt { font-size: 1rem; } .project-meta dd { font-size: 1.125rem; } } /* phones: 16px between rows, 16px labels, 18px values */
+@media (min-width: 768px) {
+  .project-meta { grid-template-columns: repeat(12, minmax(0, 1fr)); row-gap: 0; }
+  .project-meta > :nth-child(1) { grid-column: 1 / span 3; }
+  .project-meta > :nth-child(2) { grid-column: 4 / span 6; }
+  .project-meta > :nth-child(3) { grid-column: 10 / span 3; }
+}
+
+.project-hero { margin-top: var(--space-48); } /* 48px below the meta row */
+@media (max-width: 767.98px) { .project-hero { margin-top: var(--space-40); } } /* phones: 40px below the meta row */
+
+/* Case-study media: source images are 3:2 (1920×1280) and are shown whole at every width */
+.media-block { aspect-ratio: 3 / 2; background: var(--g20); overflow: hidden; margin: 0; }
+.media-block img, .media-block video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.media-block--video { aspect-ratio: 16 / 9; } /* the video is 16:9 at every width */
+.media-grid { row-gap: var(--grid-gap); margin-top: var(--grid-gap); }
+
+/* Content modules: label on cols 1-6, text on cols 7-12 (stacked on phones) */
+.module { margin-top: var(--section-space); }
+.project-hero + .module { margin-top: 5rem; } /* 80px between the hero media and the first module */
+@media (max-width: 767.98px) { .project-hero + .module { margin-top: var(--space-40); } } /* phones: 40px between the hero media and the first module */
+.module--media { margin-top: 5rem; } /* 80px between a text module and the images that follow */
+.module--media + .module { margin-top: 5rem; } /* 80px between images and the text module that follows */
+@media (max-width: 767.98px) { .module--media, .module--media + .module { margin-top: var(--space-40); } } /* phones: 40px between text and images, in both directions */
+.module .split { row-gap: var(--label-gap); }
+
+/* "More projects." */
+.more-projects { padding-block: 10rem var(--section-pad); } /* 160px (80 + 80) above, section padding below; padding-block only, the side padding comes from .site-container */
+@media (max-width: 767.98px) { .more-projects { padding-block: var(--space-48); } } /* phones: 48px above the label and below the link */
+.more-projects__link {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-16);
+  margin-top: min(var(--label-gap), 3rem); /* fluid like the other labels, capped at 48px on desktop */
+}
+.more-projects__title {
+  font-size: var(--fs-statement); font-weight: var(--fw-medium); letter-spacing: var(--ls-statement); line-height: var(--lh-heading);
+}
+.more-projects__type { /* same spec as paragraphs */
+  font-size: var(--fs-copy); font-weight: var(--fw-text); letter-spacing: var(--ls-text); line-height: var(--lh-text);
+  margin: var(--space-12) 0 0;
+}
+/* Arrow: same size as the title (48px on desktop, 28px on phones), stroke matched to the title's weight */
+.more-projects__arrow { flex: none; width: var(--fs-statement); height: var(--fs-statement); margin-top: calc(var(--fs-statement) * 0.1); /* centers the arrow on the title's first line (line height 1.2) */ stroke-width: 2; transition: transform 400ms var(--ease-out); }
+.more-projects__title { transition: color 400ms var(--ease-out); }
+@media (hover: hover) {
+  .more-projects__link:hover .more-projects__arrow { transform: translateX(16px); } /* the arrow travels 16px toward the next project */
+  .more-projects__link:hover .more-projects__title { color: var(--g80); }
+}
+.more-projects__link:focus-visible .more-projects__arrow { transform: translateX(16px); }
+
+
+/* ==========================================================================
+   12. STICKY-REVEAL FOOTER
+   The footer is position: fixed behind the page (z-index 0 vs .page z-index 1).
+   .page has margin-bottom = footer height, so scrolling to the end slides the
+   page up and uncovers the footer. The footer itself stays still.
+   js/main.js sets --footer-h and --reveal (0 -> 1, used for a soft fade-in).
+
+   Layout mirrors the hero: the label sits at the top, everything else is grouped
+   at the bottom. Statement on column 1, details on the column-7 axis, same row.
+   ========================================================================== */
+.site-footer {
+  position: fixed; inset: auto 0 0 0; z-index: 0;
+  background: var(--g100); color: var(--g10);
+  display: flex;
+  min-height: 100vh;  /* fallback */
+  min-height: 100dvh; /* one full viewport, like the hero */
+}
+
+/* Same rhythm as the rest of the page: 80px top and bottom (48px on phones; 40px bottom on phones) and a
+   section-sized gap above the copyright row (160px, 96px on phones). The gap shrinks a little on short
+   windows so the footer never outgrows the screen (never below the section padding). */
+.site-footer__inner {
+  width: 100%;
+  padding-block: var(--section-pad);
+  display: flex; flex-direction: column; gap: clamp(var(--section-pad), 17.8vh, var(--section-space));
+  opacity: calc(0.25 + 0.75 * var(--reveal, 1));
+  will-change: opacity;
+}
+.footer-main { flex: 1; display: flex; flex-direction: column; }
+
+/* The "let's talk" label: muted, lighter than the other section labels */
+.site-footer .section-label { color: var(--g40); font-weight: 400; }
+
+.footer-cta { margin-top: auto; padding-top: var(--label-gap); row-gap: var(--space-40); } /* auto pushes it to the bottom group */
+.footer-statement { margin: 0; }
+.footer-cta__text { color: var(--g40); margin: 0; }
+
+/* Availability badge: a quiet, non-interactive pill (no border, barely-there fill, no pointer, no hover).
+   Show ONE of the two badges in the HTML: add `hidden` to the other. */
+.status {
+  display: inline-flex; align-items: center; gap: 0.625rem;
+  margin: var(--space-24) 0 0; padding: var(--space-8) 1.125rem var(--space-8) var(--space-16);
+  border-radius: 999px; background: rgba(250, 247, 240, 0.06);
+  font-size: var(--fs-small); font-weight: var(--fw-text); line-height: var(--lh-ui); letter-spacing: var(--ls-ui);
+  cursor: default; user-select: none;
+}
+.status[hidden] { display: none; } /* so the HTML hidden attribute wins over display: inline-flex */
+.status__dot { position: relative; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--g50); }
+/* Available: green dot with a soft pulsing glow (a ring that scales up and fades — transform/opacity only) */
+.status--available .status__dot { background: var(--status-ok); box-shadow: 0 0 8px rgba(111, 227, 123, 0.55); }
+.status--available .status__dot::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--status-ok);
+  animation: status-pulse 2.2s ease-out infinite;
+}
+@keyframes status-pulse {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  70%  { transform: scale(3.2); opacity: 0; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+
+/* Two buttons: coral pill (primary) + outlined pill, each half of the 6-column block, 56px tall.
+   Phones: stacked and full-width, note centered under them. */
+.footer-actions { display: grid; gap: var(--space-12); margin-top: var(--space-40); }
+.footer-actions .btn-signal { border: 1px solid var(--signal); }
+.footer-actions__note { font-size: var(--fs-small); color: var(--g40); margin: 0 0 0 1.25rem; }
+
+/* Bottom row: copyright + social links, nav type style */
+.footer-bottom {
+  row-gap: 2.25rem;
+  font-size: var(--fs-nav); font-weight: var(--fw-medium); line-height: var(--lh-ui); letter-spacing: var(--ls-ui);
+}
+.footer-bottom p { margin: 0; }
+.footer-social { list-style: none; margin: 0; padding: 0; display: flex; justify-content: flex-end; gap: var(--space-40); color: var(--g40); }
+.footer-social a { transition: color 250ms; }
+.footer-social a:hover { color: var(--g10); }
+
+@media (max-width: 767.98px) {
+  .site-footer__inner { padding-bottom: var(--space-40); }
+  .footer-actions { margin-top: var(--space-48); gap: var(--space-16); }
+  .footer-actions__note { margin: calc(var(--space-8) * -1) 0 0; text-align: center; } /* 8px under the pill */
+  .footer-bottom { font-weight: var(--fw-text); row-gap: var(--space-32); }
+  .footer-social { justify-content: space-between; }
+}
+@media (min-width: 768px) {
+  .footer-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--grid-gap); row-gap: var(--space-12); }
+  .footer-actions__note { grid-column: 2; margin: 0 0 0 1.25rem; } /* under the email pill */
+}
+
+
+/* ==========================================================================
+   13. CUSTOM FOLLOWER CURSOR
+   A white dot with mix-blend-mode: difference — it inverts whatever is
+   underneath. js/main.js moves it with lerp smoothing and drives the scale.
+   The element is drawn at its LARGEST size (96px) and scaled DOWN, so the
+   circle edge stays crisp (scaling a small raster up looks pixelated):
+     default 0.25× (24px) · links/buttons ≈ 0.42× (40px) · project image 1× (96px, empty)
+   Only enabled on fine pointers (js adds .has-cursor to <html>).
+   ========================================================================== */
+.cursor {
+  position: fixed; top: 0; left: 0; z-index: 9999;
+  width: 96px; height: 96px; border-radius: 50%;
+  background: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 250ms ease;
+  will-change: transform;
+}
+.cursor.is-visible { opacity: 1; }
+
+.has-cursor, .has-cursor a, .has-cursor button { cursor: none; }
+@media (hover: none), (pointer: coarse) { .cursor { display: none; } }
+
+
+/* ==========================================================================
+   14. SCROLL REVEALS
+   Elements with [data-reveal] fade in and slide up 20px when they enter the
+   viewport (IntersectionObserver in js/main.js adds .is-visible).
+   Gated behind .js so content is visible if JavaScript fails.
+   ========================================================================== */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 20px, 0);
+  transition: opacity 900ms var(--ease-out), transform 900ms var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.js [data-reveal].is-visible { opacity: 1; transform: translate3d(0, 0, 0); }
+
+
+/* ==========================================================================
+   14b. 404 PAGE
+   Accent background, ink text. Reuses the home hero (title at the top, text at the bottom).
+   ========================================================================== */
+.page-404 { background: var(--signal); color: var(--g100); }
+.error-header { position: absolute; top: 0; left: 0; right: 0; height: var(--header-h); display: flex; align-items: center; }
+.page-404 a { text-decoration: underline; text-underline-offset: 0.12em; text-decoration-thickness: 0.06em; }
+.page-404 a:hover { text-decoration: none; }
+.page-404 .brand { text-decoration: none; }
+.page-404 ::selection { background: var(--g100); color: var(--signal); }
+
+
+/* ==========================================================================
+   15. REDUCED MOTION
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .media-frame img, .site-header, .more-projects__arrow, .back-link svg { transition: none; }
+  .project-card a:hover .media-frame img { transform: none; }
+  .site-footer__inner { opacity: 1; }
+  .status--available .status__dot::after { animation: none; opacity: 0; }
+  .mobile-menu__list li, .mobile-menu__bottom { opacity: 1; transform: none; transition: none; }
+}
