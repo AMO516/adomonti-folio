@@ -27,6 +27,7 @@
    12. Sticky-reveal footer
    13. Custom cursor
    14. Scroll reveals
+   14b. 404 page
    15. Reduced motion
    ========================================================================== */
 
@@ -63,14 +64,14 @@
   --signal:       #FE654F; /* Buttons and highlights (always with g100 text) */
   --signal-hover: #F05F4A; /* Hover / pressed fills (g100 text) */
   --signal-deep:  #B23929; /* Links and text on light backgrounds */
-  --signal-tint:  #FFE2DB; /* Soft backgrounds and tags */
+  --link:         #035E7B; /* Text links on light backgrounds (contrast 6.8 on --g10) */
   --marker:       #60AFFF; /* ::selection background (g100 text) */
   --status-ok:    #6FE37B; /* "Available for work" dot (not part of the brand palette) */
 
   /* ---- Font weights ---- */
   --fw-text:     450; /* paragraphs, lists, tags */
   --fw-medium:   500; /* labels, statements, nav, buttons */
-  --fw-card:     550; /* project card titles */
+  --fw-card:     450; /* project card titles */
   --fw-semibold: 600; /* group titles */
   --fw-bold:     700; /* display titles */
 
@@ -116,7 +117,7 @@
   --par-gap:      0.75rem;                                     /* between paragraphs */
 
   /* ---- Layout ---- */
-  --page-gutter: clamp(1.25rem, 0.2rem + 5.5vw, 5rem);        /* side space: 20px → 80px (padding only, no extra margin) */
+  --page-gutter: clamp(1.25rem, 0.534rem + 3.05vw, 2rem);      /* side space: 20px at 375px → 32px at 767px (padding only, no extra margin) */
   --grid-gap:    clamp(1rem, 0.6rem + 1.1vw, 1.5rem);          /* 16→24px column gutter */
   --header-h:    3.5rem;                                       /* 56px phones/tablet: 20px above and below the 16px logo */
 
@@ -154,6 +155,7 @@
     --ls-statement: -0.02em;
     --ls-display:   -0.03em;
     --par-gap:      1.1em;
+    --page-gutter:  clamp(2rem, 7.14vw - 1.43rem, 5rem);       /* side space: 32px at 768px → 80px at 1440px */
   }
 }
 @media (min-width: 992px) { :root { --header-h: 4.25rem; } } /* 68px on desktop */
@@ -435,6 +437,18 @@ p:last-child { margin-bottom: 0; }
 
 .project-card a { display: block; }
 
+/* Landscape phones: two cards across (they stack below 600px and in portrait). */
+@media (max-width: 767.98px) and (min-width: 600px) and (orientation: landscape) {
+  .project-grid > .project-card { flex: 0 0 auto; width: 50%; }
+}
+
+/* Desktop: every second card sits 48px lower (works for any number of projects).
+   The negative bottom margin keeps row heights unchanged; the grid padding gives the last card room. */
+@media (min-width: 992px) {
+  .project-grid { padding-bottom: var(--space-48); }
+  .project-card:nth-child(even) { margin-top: var(--space-48); margin-bottom: calc(-1 * var(--space-48)); }
+}
+
 /* Image container — overflow hidden so the zoomed image stays clipped */
 .media-frame {
   position: relative; overflow: hidden; background: var(--g20);
@@ -461,7 +475,6 @@ p:last-child { margin-bottom: 0; }
 /* Tint fallbacks while images load */
 .project-card--peach .media-frame { background: #F7E9DE; }
 .project-card--grey  .media-frame { background: #EBEBEB; }
-.project-card--olive .media-frame { background: #EFEBD6; }
 
 
 /* ==========================================================================
@@ -498,6 +511,25 @@ p:last-child { margin-bottom: 0; }
 }
 .about__portrait img { width: 100%; height: 100%; object-fit: cover; }
 .about__text { color: var(--g100); }
+.about__text p:has(> .text-link) { margin-top: var(--space-24); } /* sets the link apart from the paragraphs */
+
+/* Underlined text link with a trailing icon; on hover the line thickens and drops slightly. */
+.text-link {
+  display: inline-flex; align-items: center; gap: var(--space-8);
+  color: var(--link);
+  font-weight: 550;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+  transition: text-decoration-thickness 250ms var(--ease-out), text-underline-offset 250ms var(--ease-out);
+}
+.text-link svg { flex: none; width: 1em; height: 1em; stroke-width: 1.75; transition: transform 250ms var(--ease-out); } /* icon scales with the text */
+@media (hover: hover) {
+  .text-link:hover { text-decoration-thickness: .12em; text-underline-offset: .25em; }
+  .text-link:hover svg { transform: translate(2px, -2px); }
+}
+.text-link:focus-visible { text-decoration-thickness: .12em; text-underline-offset: .25em; }
+@media (prefers-reduced-motion: reduce) { .text-link, .text-link svg { transition: none; } }
 
 
 /* ==========================================================================
@@ -510,11 +542,11 @@ p:last-child { margin-bottom: 0; }
 .back-link {
   display: inline-flex; align-items: center; gap: var(--space-8);
   font-size: var(--fs-nav); font-weight: var(--fw-medium); letter-spacing: var(--ls-ui); line-height: var(--lh-ui);
-  margin-bottom: var(--space-40);
+  margin-bottom: 1.25rem; /* 20px between the back link and the title */
 }
 .back-link svg { transition: transform 300ms var(--ease-out); }
 .back-link:hover svg { transform: translateX(-4px); }
-@media (max-width: 767.98px) { .back-link { margin-bottom: var(--space-32); } } /* phones: 32px between the back link and the title */
+@media (max-width: 767.98px) { .back-link { margin-bottom: var(--space-16); } } /* phones: 16px between the back link and the title */
 
 /* Case-study title: 80px at desktop width, 48px on phones */
 .project-title {
@@ -522,30 +554,26 @@ p:last-child { margin-bottom: 0; }
   font-weight: var(--fw-semibold);
   line-height: 1.05;
   letter-spacing: var(--ls-heading);
-  margin-bottom: var(--space-32);
+  margin-bottom: 0;
 }
-@media (max-width: 767.98px) { .project-title { margin-bottom: var(--space-40); } } /* phones: 40px between the title and the meta row */
+@media (min-width: 768px) { .project-title { text-align: center; } } /* centered from tablet up, left aligned on phones */
 
-/* Meta row: Project type | Services | Year (cols 1-3 · 4-9 · 10-12). Phones: two columns, Year on its own row. */
-.project-meta { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-24) var(--grid-gap); }
+/* Cover picture: sits directly under the title */
+.project-hero { margin-top: var(--space-40); } /* 40px between the title and the cover picture */
+@media (max-width: 767.98px) { .project-hero { margin-top: var(--space-32); } } /* phones: 32px */
+
+/* Meta (Project type | Services | Year): inside the Overview text column, under the paragraphs (cols 7-12 on desktop).
+   Two equal columns = 3 + 3 grid columns with the 24px grid gap; Year drops to a second row. Phones: one column. */
+.project-meta { margin: var(--space-32) 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-16) var(--grid-gap); }
 .project-meta dt {
   font-size: var(--fs-nav); font-weight: var(--fw-text); letter-spacing: var(--ls-text); line-height: var(--lh-ui);
   color: var(--g100);
 }
 .project-meta dd { /* values: 20px / 130% / 500 / -0.02em */
   font-size: 1.25rem; font-weight: var(--fw-medium); letter-spacing: var(--ls-text); line-height: var(--lh-text);
-  margin: 0;
+  margin: var(--space-4) 0 0; /* 4px between label and value */
 }
-@media (max-width: 767.98px) { .project-meta { row-gap: 1rem; } .project-meta dt { font-size: 1rem; } .project-meta dd { font-size: 1.125rem; } } /* phones: 16px between rows, 16px labels, 18px values */
-@media (min-width: 768px) {
-  .project-meta { grid-template-columns: repeat(12, minmax(0, 1fr)); row-gap: 0; }
-  .project-meta > :nth-child(1) { grid-column: 1 / span 3; }
-  .project-meta > :nth-child(2) { grid-column: 4 / span 6; }
-  .project-meta > :nth-child(3) { grid-column: 10 / span 3; }
-}
-
-.project-hero { margin-top: var(--space-48); } /* 48px below the meta row */
-@media (max-width: 767.98px) { .project-hero { margin-top: var(--space-40); } } /* phones: 40px below the meta row */
+@media (max-width: 767.98px) { .project-meta { grid-template-columns: 1fr; } .project-meta dt { font-size: 1rem; } .project-meta dd { font-size: 1.125rem; } } /* phones: one column, 16px labels, 18px values */
 
 /* Case-study media: source images are 3:2 (1920×1280) and are shown whole at every width */
 .media-block { aspect-ratio: 3 / 2; background: var(--g20); overflow: hidden; margin: 0; }
@@ -558,7 +586,8 @@ p:last-child { margin-bottom: 0; }
 .project-hero + .module { margin-top: 5rem; } /* 80px between the hero media and the first module */
 @media (max-width: 767.98px) { .project-hero + .module { margin-top: var(--space-40); } } /* phones: 40px between the hero media and the first module */
 .module--media { margin-top: 5rem; } /* 80px between a text module and the images that follow */
-.module--media + .module { margin-top: 5rem; } /* 80px between images and the text module that follows */
+.module--media + .module { margin-top: 5rem; }
+@media (min-width: 768px) { .project-hero + .module + .module--media { margin-top: 4rem; } } /* 64px between the Overview (with the tags) and the pictures */
 @media (max-width: 767.98px) { .module--media, .module--media + .module { margin-top: var(--space-40); } } /* phones: 40px between text and images, in both directions */
 .module .split { row-gap: var(--label-gap); }
 
