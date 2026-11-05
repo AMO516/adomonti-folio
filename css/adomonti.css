@@ -72,6 +72,7 @@
   --fw-text:     450; /* paragraphs, lists, tags */
   --fw-medium:   500; /* labels, statements, nav, buttons */
   --fw-card:     450; /* project card titles */
+  --fw-link:     550; /* text links */
   --fw-semibold: 600; /* group titles */
   --fw-bold:     700; /* display titles */
 
@@ -412,14 +413,13 @@ p:last-child { margin-bottom: 0; }
   gap: clamp(3rem, 8vw, 7rem);
 }
 
-/* Tagline: 6 columns (cols 7-12) on desktop, justified, first line indented */
+/* Tagline: 6 columns (cols 7-12) on desktop, first line indented, left aligned (not justified: justify stretches the word spacing) */
 .hero__tagline {
   font-size: var(--fs-tagline);
   font-weight: var(--fw-medium);
   letter-spacing: var(--ls-heading);
   line-height: var(--lh-heading);
   text-indent: 2.2em;
-  text-align: justify; hyphens: manual;
   margin: 0;
 }
 .hero__tagline em { font-style: normal; color: var(--signal); }
@@ -437,16 +437,22 @@ p:last-child { margin-bottom: 0; }
 
 .project-card a { display: block; }
 
+/* Gap between the project cards: 24px up to 992px, growing to 48px at 1440px (rows use the same value).
+   Only this grid; the picture pairs inside case studies keep the 24px grid gap. */
+@media (min-width: 768px) {
+  .project-grid { --bs-gutter-x: clamp(1.5rem, 5.36vw - 1.825rem, 3rem); row-gap: var(--bs-gutter-x); }
+}
+
 /* Landscape phones: two cards across (they stack below 600px and in portrait). */
 @media (max-width: 767.98px) and (min-width: 600px) and (orientation: landscape) {
   .project-grid > .project-card { flex: 0 0 auto; width: 50%; }
 }
 
-/* Desktop: every second card sits 48px lower (works for any number of projects).
+/* Desktop: every second card sits one --block-gap lower (96px at 1440px; works for any number of projects).
    The negative bottom margin keeps row heights unchanged; the grid padding gives the last card room. */
 @media (min-width: 992px) {
-  .project-grid { padding-bottom: var(--space-48); }
-  .project-card:nth-child(even) { margin-top: var(--space-48); margin-bottom: calc(-1 * var(--space-48)); }
+  .project-grid { padding-bottom: var(--block-gap); }
+  .project-card:nth-child(even) { margin-top: var(--block-gap); margin-bottom: calc(-1 * var(--block-gap)); }
 }
 
 /* Image container — overflow hidden so the zoomed image stays clipped */
@@ -517,7 +523,7 @@ p:last-child { margin-bottom: 0; }
 .text-link {
   display: inline-flex; align-items: center; gap: var(--space-8);
   color: var(--link);
-  font-weight: 550;
+  font-weight: var(--fw-link);
   text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 5px;
