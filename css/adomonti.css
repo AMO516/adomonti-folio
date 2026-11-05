@@ -111,8 +111,8 @@
 
   /* Phones (< 768px) — statements, hero tagline, hero title */
   --fs-statement: clamp(1.5rem, 7.5vw, 1.75rem);               /* 24→28px */
-  --fs-tagline:   clamp(1.375rem, 7.5vw, 1.75rem);             /* 22→28px */
-  --fs-display:   clamp(2.5rem, 18.46vw, 4.5rem);              /* 40→72px  "DESIGNER" must fit the width */
+  --fs-tagline:   clamp(1.375rem, 0.87rem + 2.58vw, 2.4rem);   /* 22px → 24px at 393 → 35px at 820 → 38px at 991; desktop redefined at 992px */
+  --fs-display:   min(9rem, max(clamp(2.5rem, 18.46vw, 4.5rem), 9.4vw + 0.55rem)); /* 72px up to ~670px wide ("DESIGNER" must fit), then grows to 144px at 1440px */
   --ls-statement: -0.03em;
   --ls-display:   -0.04em;
   --par-gap:      0.75rem;                                     /* between paragraphs */
@@ -151,15 +151,13 @@
 @media (min-width: 768px) {
   :root {
     --fs-statement: clamp(1.625rem, 1rem + 2.22vw, 3rem);      /* 26→48px */
-    --fs-tagline:   clamp(1.375rem, 1rem + 1.74vw, 2.5rem);    /* 22→40px */
-    --fs-display:   clamp(2.5rem, 9.4vw + 0.55rem, 9rem);      /* 40→144px (144px at 1440px) */
     --ls-statement: -0.02em;
     --ls-display:   -0.03em;
     --par-gap:      1.1em;
     --page-gutter:  clamp(2rem, 7.14vw - 1.43rem, 5rem);       /* side space: 32px at 768px → 80px at 1440px */
   }
 }
-@media (min-width: 992px) { :root { --header-h: 4.25rem; } } /* 68px on desktop */
+@media (min-width: 992px) { :root { --header-h: 4.25rem; --fs-tagline: clamp(1.375rem, 1rem + 1.74vw, 2.5rem); } } /* 68px header; tagline 33px at 992 → 40px at 1440 */
 
 /* Inter — official "web use" CSS (rsms.me/inter); the font file itself is self-hosted via @font-face above. */
 :root {
@@ -253,6 +251,9 @@ p:last-child { margin-bottom: 0; }
   line-height: var(--lh-heading);
   margin: var(--label-gap) 0 0;
 }
+/* Desktop: statements span 7 columns but never get wider than they are at 1440px (about 15.5 x the font size),
+   so on very large screens they keep their 2-3 line shape instead of stretching into one long line. */
+@media (min-width: 992px) { .statement { max-width: 15.5em; } }
 
 /* Running text: one spec for every paragraph block (services, about, case studies, footer).
    Paragraphs inside a block are separated by --par-gap. */
@@ -401,8 +402,8 @@ p:last-child { margin-bottom: 0; }
 
 /* ==========================================================================
    7. HERO
-   One viewport tall. Desktop: title at the top, tagline at the bottom.
-   Phones: title + tagline form one block, vertically centered.
+   One viewport tall. Title at the top, tagline at the bottom.
+   Portrait screens get a compact hero; phones get an unindented tagline.
    ========================================================================== */
 .hero {
   min-height: 100vh;  /* fallback */
@@ -411,6 +412,11 @@ p:last-child { margin-bottom: 0; }
   padding-bottom: var(--section-pad);
   display: flex; flex-direction: column; justify-content: space-between;
   gap: clamp(3rem, 8vw, 7rem);
+}
+/* Portrait screens (phones, tablets): compact hero that grows slowly with the width, never taller than the screen.
+   544px at 393 · 587px at 744 · 597px at 820 · 600px at 844. Landscape and laptops keep the full-height hero. */
+@media (orientation: portrait) {
+  .hero { min-height: min(100vh, calc(31rem + 12.3vw)); min-height: min(100dvh, calc(31rem + 12.3vw)); }
 }
 
 /* Tagline: 6 columns (cols 7-12) on desktop, first line indented, left aligned (not justified: justify stretches the word spacing) */
@@ -424,8 +430,9 @@ p:last-child { margin-bottom: 0; }
 }
 .hero__tagline em { font-style: normal; color: var(--signal); }
 
+/* Phones: no indent, so the tagline fills two lines up to the right margin */
 @media (max-width: 767.98px) {
-  .hero { justify-content: center; gap: 6rem; padding-block: 7rem; }
+  .hero__tagline { text-indent: 0; }
 }
 
 
