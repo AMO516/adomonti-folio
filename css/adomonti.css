@@ -704,6 +704,29 @@ p:last-child { margin-bottom: 0; }
 .footer-social a { transition: color 250ms; }
 .footer-social a:hover { color: var(--g10); }
 
+/* Back-to-top button: round, outlined like the secondary button, at the right end of the bottom row (inside the fixed
+   footer, so it fades in with the rest as the footer is uncovered). Phones: bottom-right, level with the copyright.
+   Desktop: vertically centered with the copyright block and the social links. */
+.footer-bottom { position: relative; }
+.to-top {
+  position: absolute; right: calc(var(--bs-gutter-x, 1.5rem) / 2); bottom: 0; /* row has -12px side margins: this lands on the page margin */
+  width: 2.75rem; height: 2.75rem; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--g60); color: var(--g10);
+  transition: background-color 250ms, color 250ms, border-color 250ms;
+}
+.to-top svg { transition: transform 250ms var(--ease-out); }
+@media (hover: hover) {
+  .to-top:hover { background: var(--g10); color: var(--g100); border-color: var(--g10); }
+  .to-top:hover svg { transform: translateY(-2px); }
+}
+.to-top:focus-visible { background: var(--g10); color: var(--g100); border-color: var(--g10); }
+@media (min-width: 992px) {
+  .footer-bottom { align-items: center; }
+  .to-top { top: 50%; bottom: auto; transform: translateY(-50%); }
+  .footer-social { margin-right: calc(2.75rem + var(--space-40)); } /* room for the button, same 40px gap as between the links */
+}
+
 @media (max-width: 767.98px) {
   .site-footer__inner { padding-bottom: var(--space-40); }
   .footer-actions { margin-top: var(--space-48); gap: var(--space-16); }
@@ -779,6 +802,7 @@ p:last-child { margin-bottom: 0; }
   .media-frame img, .site-header, .more-projects__arrow, .back-link svg { transition: none; }
   .project-card a:hover .media-frame img { transform: none; }
   .site-footer__inner { opacity: 1; }
+  .to-top, .to-top svg { transition: none; }
   .status--available .status__dot::after { animation: none; opacity: 0; }
   .mobile-menu__list li, .mobile-menu__bottom { opacity: 1; transform: none; transition: none; }
 }
